@@ -1,8 +1,6 @@
 # Dynomatic
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/dynomatic`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+Use this gem to automatically scale up/down your Heroku worker dynos based on the number of jobs currently waiting in the queue. Currently only DelayedJob is supported but it's really easy to add support for your preferred background job library.
 
 ## Installation
 
@@ -22,7 +20,35 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Configure it as follows:
+
+```ruby
+# In an initializer:
+Dynomatic.configure do |config|
+  # Optional, since it will try to detect the correct adapter: 
+  # config.adapter = Dynomatic::Adapters::DelayedJob
+  config.heroku_token = ENV["HEROKU_TOKEN"]
+  config.heroku_app = ENV["HEROKU_APP"]
+
+  # Add your own rules here. Dynomatic will select the lowest dyno count that
+  # matches the "at_least" number of jobs.
+  #
+  # Some examples based on the following rules:
+  #   25 jobs = 10 dynos, 31 jobs = 15 dynos
+  config.rules = [
+    {at_least: 0, dynos: 1},
+    {at_least: 10, dynos: 5},
+    {at_least: 20, dynos: 10},
+    {at_least: 30, dynos: 15},
+  ]
+end
+```
+
+## FAQ
+
+_Does this take into account jobs in the future, or failed, retrying jobs?_
+
+No, it only counts jobs that need to be run right now.
 
 ## Development
 
@@ -32,7 +58,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/dynomatic.
+Bug reports and pull requests are welcome on GitHub at https://github.com/dv/dynomatic.
 
 ## License
 
@@ -41,4 +67,4 @@ The gem is available as open source under the terms of the [MIT License](https:/
 
 ## TODO
 - Hysteresis
-- 
+- Other ActiveJob adapters beyond DelayedJob

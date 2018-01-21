@@ -1,5 +1,3 @@
-puts "Loaded!"
-
 module Dynomatic
   module Adapters
     class DelayedJob < Adapter
