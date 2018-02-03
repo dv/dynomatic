@@ -45,7 +45,12 @@ module Dynomatic
     end
 
     def scaler
-      @scaler ||= Scaler.new(configuration.heroku_token, configuration.heroku_app)
+      @scaler ||=
+        if configuration.worker_names.present?
+          HobbyScaler.new(configuration.heroku_token, configuration.heroku_app, configuration.worker_names)
+        else
+          Scaler.new(configuration.heroku_token, configuration.heroku_app)
+        end
     end
   end
 end

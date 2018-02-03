@@ -8,6 +8,7 @@ module Dynomatic
   autoload :Configuration
   autoload :Master
   autoload :Scaler
+  autoload :HobbyScaler
 
   mattr_accessor(:configuration) { Configuration.new }
 

@@ -46,8 +46,56 @@ Dynomatic.configure do |config|
     {at_least: 20, dynos: 10},
     {at_least: 30, dynos: 15},
   ]
+
+  # Optional (see README), let Dynomatic know which are the worker dynos:
+  # config.worker_names = %w(worker1 worker2 worker3 worker4)
 end
 ```
+
+## What if I'm using Hobby dynos?
+
+Heroku only allows one to scale up/down dynos if they're the more expensive "professional" dynos. If you're using Hobby dynos, you can only start and stop them.
+
+To work around that, we can just create a bunch of different dyno types, and then enable/disable them as a means of scaling up or down.
+
+First you need to setup the dynos in your `Procfile`. Wheras before it probably looked a bit like this:
+
+```
+web: bundle exec puma -C config/puma.rb
+worker: bundle exec rails jobs:work
+```
+
+Now add a bunch of worker-types with the exact same command:
+
+```
+web: bundle exec puma -C config/puma.rb
+worker1: bundle exec rails jobs:work
+worker2: bundle exec rails jobs:work
+worker3: bundle exec rails jobs:work
+worker4: bundle exec rails jobs:work
+```
+
+You can add however many you want, but we can't scale beyond the amount that you define here.
+
+Next, in the Dynomatic configuration, add the names of those worker dyno types:
+
+```
+Dynomatic.configure do |config|
+  # ...
+  config.worker_names = %w(worker1 worker2 worker3 worker4)
+
+  # Since we only have 4 worker dyno types, we can only scale up to 4:
+  config.rules = [
+    {at_least: 0, dynos: 1},
+    {at_least: 50, dynos: 2},
+    {at_least: 100, dynos: 4},
+  ]
+end
+```
+
+Now instead of scaling up/down a singular `worker` dyno depending on the rules, Dynomatic will instead start/stop the next dyno type in the `worker_names` type.
+
+Considering the above example, if there's 55 jobs in the queue, Dynomatic will start both `worker1` and `worker2` and stop `worker3` and `worker4`, while if there's only 20, it will only start `worker1` and stop the remainder.
 
 ## FAQ
 
