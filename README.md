@@ -1,6 +1,8 @@
 # Dynomatic
 
-Use this gem to automatically scale up/down your Heroku worker dynos based on the number of jobs currently waiting in the queue. Currently only DelayedJob is supported but it's really easy to add support for your preferred background job library.
+Use this gem to automatically scale up/down your Heroku worker dynos based on the number of ActiveeJob jobs currently waiting in the queue.
+
+Currently only DelayedJob is supported but it's really easy to add support for your preferred background job library (see `lib/dynomatic/adapters/delayed_job`, it's basically one method you need to implement. PRs welcome!).
 
 ## Installation
 
@@ -52,6 +54,8 @@ Dynomatic.configure do |config|
 end
 ```
 
+Unless you call `Dynomatic.configure`, it won't hook into ActiveJob. It's sufficient to just skip that call in other environments to disable the scaling.
+
 ## What if I'm using Hobby dynos?
 
 Heroku only allows one to scale up/down dynos if they're the more expensive "professional" dynos. If you're using Hobby dynos, you can only start and stop them.
@@ -60,14 +64,14 @@ To work around that, we can just create a bunch of different dyno types, and the
 
 First you need to setup the dynos in your `Procfile`. Wheras before it probably looked a bit like this:
 
-```
+```Procfile
 web: bundle exec puma -C config/puma.rb
 worker: bundle exec rails jobs:work
 ```
 
 Now add a bunch of worker-types with the exact same command:
 
-```
+```Procfile
 web: bundle exec puma -C config/puma.rb
 worker1: bundle exec rails jobs:work
 worker2: bundle exec rails jobs:work
@@ -79,7 +83,7 @@ You can add however many you want, but we can't scale beyond the amount that you
 
 Next, in the Dynomatic configuration, add the names of those worker dyno types:
 
-```
+```ruby
 Dynomatic.configure do |config|
   # ...
   config.worker_names = %w(worker1 worker2 worker3 worker4)
