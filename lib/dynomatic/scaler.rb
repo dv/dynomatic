@@ -2,10 +2,10 @@ require "platform-api"
 
 module Dynomatic
   class Scaler
-    attr :heroku_key, :heroku_app
+    attr :heroku_token, :heroku_app
 
-    def initialize(heroku_key, heroku_app)
-      @heroku_key = heroku_key
+    def initialize(heroku_token, heroku_app)
+      @heroku_token = heroku_token
       @heroku_app = heroku_app
     end
 
@@ -16,7 +16,7 @@ module Dynomatic
     private
 
     def client
-      @client = ::PlatformAPI.connect_oauth(heroku_key)
+      @client = ::PlatformAPI.connect_oauth(heroku_token)
     end
   end
 end

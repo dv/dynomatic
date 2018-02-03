@@ -37,14 +37,15 @@ module Dynomatic
       self.current_dyno_count = new_dyno_count
 
       scaler.scale_to(new_dyno_count)
-    rescue
+    rescue => error
       # If something went wrong, reset to old value
       self.current_dyno_count = old_dyno_count
-      raise
+
+      Rails.logger.error "Something went wrong while adjusting dyno count: #{error.message}."
     end
 
     def scaler
-      @scaler ||= Scaler.new(configuration.heroku_key, configuration.heroku_app)
+      @scaler ||= Scaler.new(configuration.heroku_token, configuration.heroku_app)
     end
   end
 end

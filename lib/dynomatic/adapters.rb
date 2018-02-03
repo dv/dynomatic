@@ -9,7 +9,7 @@ module Dynomatic
     def detect
       case
       when defined? ::Delayed::Job
-        Dynomatic::Adapters::DelayedJob
+        Dynomatic::Adapters::DelayedJob.new
       else
         nil
       end

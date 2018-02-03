@@ -1,6 +1,6 @@
 module Dynomatic
   module Adapters
-    class DelayedJob < Adapter
+    class DelayedJob
       def job_count
         Delayed::Job.where("run_at <= NOW()").count
       end
